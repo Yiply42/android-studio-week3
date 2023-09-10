@@ -79,11 +79,30 @@ public class GameActivity extends AppCompatActivity {
     // Handle key events to move the player
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        // TODO logic to move the player (remember to check collisions)
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                playerX -= 50;
+                break;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                playerX += 50;
+                break;
+            case KeyEvent.KEYCODE_DPAD_UP:
+                playerY += 50;
+                break;
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                playerY -= 50;
+                break;
+        }
+        playerView.updatePosition(playerX, playerY);
+        checkCollisions();
+        return true;
     }
 
     private void initializeDots() {
-        // TODO Create and add dots with random positions
+        for (int i = 0; i < 20; i++) {
+            dots.add(new Dot(random.nextFloat() * screenWidth,
+                    random.nextFloat() * screenHeight, 50));
+        }
     }
 
     /*
@@ -99,12 +118,20 @@ public class GameActivity extends AppCompatActivity {
 
     // Maintains 20 dots on screen
     private void respawnDotsIfNeeded() {
-        // TODO: if dots drop below 20, respawn dots
+        int neededDots = MAX_DOTS - dots.size();
+        for (int i = 0; i <  neededDots; i++) {
+            respawnDot();
+        }
     }
 
     // Recreates the dots. Respawn mechanic
     private void respawnDot() {
-        //TODO: randomly spawn a dot (need to make both UI and background class)
+        Dot newDot = new Dot(random.nextFloat() * screenWidth,
+                random.nextFloat() * screenHeight, 50);
+        dots.add(newDot);
+        DotView newDotView = new DotView(this, newDot);
+        gameLayout.addView(newDotView);
+        dotViewMap.put(newDot, newDotView);
     }
 
     /*
@@ -124,7 +151,9 @@ public class GameActivity extends AppCompatActivity {
                     launchGameWinActivity();
                 }
             } else if (dot.isExpired()) { // TODO: Checks if dots have expired.
-                
+                dot.setInvisible();
+                gameLayout.removeView(dotViewMap.get(dot));
+                dots.remove(i);
             }
         }
     }
